@@ -105,6 +105,12 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 	imageId := *imageData.ID
 
 	state.Put("image_id", imageId)
+	if err := writeTrackedResources(state); err != nil {
+		err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	ui.Say("Image Successfully created!")
 	ui.Say(fmt.Sprintf("Image's Name: %s", config.ImageName))
