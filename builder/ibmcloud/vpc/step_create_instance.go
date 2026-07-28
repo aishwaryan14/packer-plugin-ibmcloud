@@ -130,6 +130,12 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 		state.Put("instance_data", instanceData)
+		if err := writeTrackedResources(state); err != nil {
+			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 		ui.Say("Instance successfully created!")
 		ui.Say(fmt.Sprintf("Instance's Name: %s", *instanceData.Name))
 		ui.Say(fmt.Sprintf("Instance's ID: %s", *instanceData.ID))
@@ -200,6 +206,12 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 		}
 
 		state.Put("instance_data", instanceData)
+		if err := writeTrackedResources(state); err != nil {
+			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 
 		ui.Say("Instance successfully created!")
 		ui.Say(fmt.Sprintf("Instance's Name: %s", *instanceData.Name))
@@ -268,6 +280,12 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 		}
 
 		state.Put("instance_data", instanceData)
+		if err := writeTrackedResources(state); err != nil {
+			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 
 		ui.Say("Instance successfully created with the provided boot volume!")
 		ui.Say(fmt.Sprintf("Instance's Name: %s", *instanceData.Name))
@@ -328,6 +346,12 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 		}
 
 		state.Put("instance_data", instanceData)
+		if err := writeTrackedResources(state); err != nil {
+			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 
 		ui.Say("Instance successfully created with the provided boot snapshot!")
 		ui.Say(fmt.Sprintf("Instance's Name: %s", *instanceData.Name))
