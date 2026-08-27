@@ -16,6 +16,8 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 	client := state.Get("client").(*IBMCloudClient)
 	config := state.Get("config").(Config)
 
+	emitStage(ui, "create_sec_group_rules", "START")
+
 	if config.SecurityGroupID == "" {
 		ui.Say(fmt.Sprintf("Creating a temp Security Group on VPC %s ...", state.Get("vpc_id").(string)))
 
@@ -47,6 +49,7 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 			state.Put("error", err)
 			ui.Error(err.Error())
 			// log.Fatalf(err.Error())
+			emitStage(ui, "create_sec_group_rules", "FAIL")
 			return multistep.ActionHalt
 		}
 		securityGroupID := *SecurityGroupData.ID
@@ -57,6 +60,7 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			emitStage(ui, "create_sec_group_rules", "FAIL")
 			return multistep.ActionHalt
 		}
 		ui.Say("Temp Security Group on VPC successfully created!")
@@ -73,6 +77,7 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 			err := fmt.Errorf("[ERROR] Error getting Security Group: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			emitStage(ui, "create_sec_group_rules", "FAIL")
 			return multistep.ActionHalt
 		}
 		securityGroupName := *SecurityGroupData.Name
@@ -165,6 +170,7 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 				err := fmt.Errorf("[ERROR] Error creating a new Security Group's rule for %s %s: %s", remote.remoteType, remote.value, err2)
 				state.Put("error", err)
 				ui.Error(err.Error())
+				emitStage(ui, "create_sec_group_rules", "FAIL")
 				return multistep.ActionHalt
 			}
 
@@ -176,6 +182,7 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 					err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
+					emitStage(ui, "create_sec_group_rules", "FAIL")
 					return multistep.ActionHalt
 				}
 			}
@@ -193,10 +200,12 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 		state.Put("error", err)
 		ui.Error(err.Error())
 		// log.Fatalf(err.Error())
+		emitStage(ui, "create_sec_group_rules", "FAIL")
 		return multistep.ActionHalt
 	}
 	ui.Say("Instance successfully added to the Security Group.")
 
+	emitStage(ui, "create_sec_group_rules", "END")
 	return multistep.ActionContinue
 }
 
