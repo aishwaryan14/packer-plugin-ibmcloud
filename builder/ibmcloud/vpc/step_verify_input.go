@@ -21,7 +21,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
 
-	emitStage(ui, "verify_input", "START")
 	// vpc service
 	var vpcService *vpcv1.VpcV1
 	if state.Get("vpcService") != nil {
@@ -36,7 +35,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 		err := fmt.Errorf("[ERROR] Error fetching region : %s: %s", config.Region, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		emitStage(ui, "verify_input", "FAIL")
 		return multistep.ActionHalt
 	}
 	// region check ends
@@ -45,7 +43,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 		err := fmt.Errorf("[ERROR] Either one of resource_group_name or resource_group_id can be given, both together are not supported")
 		state.Put("error", err)
 		ui.Error(err.Error())
-		emitStage(ui, "verify_input", "FAIL")
 		return multistep.ActionHalt
 	} else if config.ResourceGroupID != "" || config.ResourceGroupName != "" {
 		rcUrl := config.RCEndpoint
@@ -61,7 +58,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 			err := fmt.Errorf("[ERROR] Error creating instance of ResourceManagerV2 for resource group: %s: %s", config.ResourceGroupID, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 		if config.ResourceGroupName != "" {
@@ -73,7 +69,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 				err := fmt.Errorf("[ERROR] Error fetching resource group : %s: %s", config.ResourceGroupName, err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "verify_input", "FAIL")
 				return multistep.ActionHalt
 			}
 			if len(ResourceGroupName.Resources) == 1 {
@@ -86,7 +81,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 				err := fmt.Errorf("[ERROR] Error fetching resource group, no resource group found with name : %s", config.ResourceGroupName)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "verify_input", "FAIL")
 				return multistep.ActionHalt
 			}
 		} else {
@@ -95,13 +89,11 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 				err := fmt.Errorf("[ERROR] Error fetching resource group : %s: %s", config.ResourceGroupID, err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "verify_input", "FAIL")
 				return multistep.ActionHalt
 			} else if result == nil {
 				err := fmt.Errorf("[ERROR] Resource group not found resource_group_id : %s: %s", config.ResourceGroupID, err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "verify_input", "FAIL")
 				return multistep.ActionHalt
 			}
 		}
@@ -118,27 +110,23 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 				err := fmt.Errorf("[ERROR] Boot volume provided is not found : %s", config.VSIBootVolumeID)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "verify_input", "FAIL")
 				return multistep.ActionHalt
 			}
 			err := fmt.Errorf("[ERROR] Error fetching volume %s", config.VSIBootVolumeID)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 		if bootVolume.OperatingSystem == nil || bootVolume.OperatingSystem.Architecture == nil {
 			err := fmt.Errorf("[ERROR] Provided volume %s is not a bootable volume. Please provide an unattached bootable volume", config.VSIBootVolumeID)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 		if bootVolume.AttachmentState != nil && *bootVolume.AttachmentState != "unattached" {
 			err := fmt.Errorf("[ERROR] Provided volume %s is either already attached or unusuble. Please provide an unattached bootable volume", config.VSIBootVolumeID)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 	}
@@ -154,20 +142,17 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 				err := fmt.Errorf("[ERROR] Boot snapahot provided is not found %s:", config.VSIBootSnapshotID)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "verify_input", "FAIL")
 				return multistep.ActionHalt
 			}
 			err := fmt.Errorf("[ERROR] Error fetching snapshot %s", config.VSIBootSnapshotID)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 		if bootSnapshot.OperatingSystem == nil || bootSnapshot.OperatingSystem.Architecture == nil {
 			err := fmt.Errorf("[ERROR] Provided snapshot %s is not a bootable snapshot. Please provide an unattached bootable snapshot", config.VSIBootSnapshotID)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 	}
@@ -186,7 +171,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 		err := fmt.Errorf("[ERROR] Error fetching custom image %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		emitStage(ui, "verify_input", "FAIL")
 		return multistep.ActionHalt
 	}
 	allrecs := availableImages.Images
@@ -195,7 +179,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 		err := fmt.Errorf("[ERROR] An Image exist with the same name :%s", config.ImageName)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		emitStage(ui, "verify_input", "FAIL")
 		return multistep.ActionHalt
 	}
 	// image check ends
@@ -207,7 +190,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 				err := fmt.Errorf("[ERROR] Invalid user tag \"\", tags can be in `key:value` or `label` format, for example:, tags:\"my_tag\" ")
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "verify_input", "FAIL")
 				return multistep.ActionHalt
 			}
 		}
@@ -223,7 +205,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 			err := fmt.Errorf("[ERROR] Error fetching security group %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 		if *secGrp.ID != "" {
@@ -246,7 +227,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 			err = fmt.Errorf("[ERROR] Global Search service creation failed: %w", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 		if action := verifyCRNs(globalSearchAPIV2, config, ui, state); action != multistep.ActionContinue {
@@ -262,12 +242,10 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 			err := fmt.Errorf("[ERROR] Encryption crn (%s) information could not be retrieved: %s", config.EncryptionKeyCRN, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "verify_input", "FAIL")
 			return multistep.ActionHalt
 		}
 		ui.Say("Encryption information successfully retrieved ...")
 	}
-	emitStage(ui, "verify_input", "END")
 	return multistep.ActionContinue
 }
 

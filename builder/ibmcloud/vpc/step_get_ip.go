@@ -17,8 +17,6 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	emitStage(ui, "get_ip", "START")
-
 	instanceData := state.Get("instance_data").(*vpcv1.Instance)
 
 	ui.Say(fmt.Sprintf("Getting %s IP...", config.VSIInterface))
@@ -39,8 +37,6 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 			err := fmt.Errorf("[ERROR] Error creating FloatingIP: %s", errIP)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			// log.Fatalf(err.Error())
-			emitStage(ui, "get_ip", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -60,8 +56,6 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 			err := fmt.Errorf("[ERROR] Error waiting for Floating IP to become ACTIVE: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			// log.Fatalf(err.Error())
-			emitStage(ui, "get_ip", "FAIL")
 			return multistep.ActionHalt
 		}
 		ui.Say("Floating IP is ACTIVE!")
@@ -73,8 +67,6 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 		err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		// log.Fatalf(err.Error())
-		// 		emitStage(ui, "get_ip", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -91,7 +83,6 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 	hostsFilePath := os.Getenv("ANSIBLE_INVENTORY_FILE")
 	if hostsFilePath == "" {
 		// No inventory file specified, continuing on to next step
-		emitStage(ui, "get_ip", "END")
 		return multistep.ActionContinue
 	}
 
@@ -101,12 +92,8 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 		err := fmt.Errorf("[ERROR] Failed to write IP address to file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		// log.Fatalf(err.Error())
-		emitStage(ui, "get_ip", "FAIL")
 		return multistep.ActionHalt
 	}
-	// ui.Say(fmt.Sprintf("IP address has been written into file %s", hostsFilePath))
-	emitStage(ui, "get_ip", "END")
 	return multistep.ActionContinue
 }
 
