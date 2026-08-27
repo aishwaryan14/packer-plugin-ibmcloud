@@ -103,7 +103,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			new(StepCreateVPCServiceInstance),
 			new(stepRebootInstance),
 			withStage(StageCaptureImage, new(stepCaptureImage)),
-			withStage(StageImageWait, new(stepWaitforImage)),
+			withStage(StageWaitImage, new(stepWaitforImage)),
 		}
 	} else if b.config.Comm.Type == "ssh" {
 		steps = []multistep.Step{
@@ -115,7 +115,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			new(stepCreateSshKeyPair),
 			new(stepCreateSshKeyVPC),
 			withStage(StageCreateInstance, new(stepCreateInstance)),
-			withStage(StageWaitInstance, new(stepWaitforImage)),
+			withStage(StageWaitInstance, new(stepWaitforInstance)),
 			new(stepGetIP),
 			new(stepCreateSecurityGroupRules),
 			&communicator.StepConnect{
@@ -127,7 +127,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			new(StepCreateVPCServiceInstance),
 			new(stepRebootInstance),
 			withStage(StageCaptureImage, new(stepCaptureImage)),
-			withStage(StageWaitInstance, new(stepWaitforImage)),
+			withStage(StageWaitImage, new(stepWaitforImage)),
 		}
 	}
 
