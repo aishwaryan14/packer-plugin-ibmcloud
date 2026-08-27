@@ -51,7 +51,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 		Name: &[]string{state.Get("zone").(string)}[0],
 	}
 
-	emitStage(ui, "create_instance", "START")
 	ui.Say("Creating Instance...")
 
 	// For catalog images
@@ -95,7 +94,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 				err := fmt.Errorf("[ERROR] Error reading user data file. Error: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "create_instance", "FAIL")
 				return multistep.ActionHalt
 			}
 			instancePrototypeModel.UserData = &[]string{string(content)}[0]
@@ -129,7 +127,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			// log.Fatalf(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 		state.Put("instance_data", instanceData)
@@ -137,7 +134,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 		ui.Say("Instance successfully created!")
@@ -173,7 +169,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 				err := fmt.Errorf("[ERROR] Error reading user data file. Error: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "create_instance", "FAIL")
 				return multistep.ActionHalt
 			}
 			instancePrototypeModel.UserData = &[]string{string(content)}[0]
@@ -207,7 +202,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			// log.Fatalf(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -216,7 +210,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -250,7 +243,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 				err := fmt.Errorf("[ERROR] Error reading user data file. Error: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "create_instance", "FAIL")
 				return multistep.ActionHalt
 			}
 			instancePrototypeModel.UserData = &[]string{string(content)}[0]
@@ -284,7 +276,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			// log.Fatalf(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -293,7 +284,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -327,7 +317,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 				err := fmt.Errorf("[ERROR] Error reading user data file. Error: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				emitStage(ui, "create_instance", "FAIL")
 				return multistep.ActionHalt
 			}
 			instancePrototypeModel.UserData = &[]string{string(content)}[0]
@@ -353,7 +342,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			// log.Fatalf(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -362,7 +350,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 			err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "create_instance", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -370,7 +357,6 @@ func (step *stepCreateInstance) Run(_ context.Context, state multistep.StateBag)
 		ui.Say(fmt.Sprintf("Instance's Name: %s", *instanceData.Name))
 		ui.Say(fmt.Sprintf("Instance's ID: %s", *instanceData.ID))
 	}
-	emitStage(ui, "create_instance", "END")
 	return multistep.ActionContinue
 }
 

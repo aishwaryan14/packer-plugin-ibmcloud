@@ -89,8 +89,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			new(stepGetBaseImageID),
 			new(stepCreateSshKeyPair),
 			new(stepCreateSshKeyVPC),
-			new(stepCreateInstance),
-			new(stepWaitforInstance),
+			withStage(StageCreateInstance, new(stepCreateInstance)),
+			withStage(StageWaitInstance, new(stepWaitforInstance)),
 			new(stepGetIP),
 			new(stepCreateSecurityGroupRules),
 			new(stepWaitWinRM),
@@ -99,10 +99,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:        winRMCommHost,
 				WinRMConfig: winRMConfig,
 			},
-			new(stepInstallComponents),
+			withStage(StageInstallingComponents, new(stepInstallComponents)),
 			new(StepCreateVPCServiceInstance),
 			new(stepRebootInstance),
-			new(stepCaptureImage),
+			withStage(StageCaptureImage, new(stepCaptureImage)),
+			withStage(StageImageWait, new(stepWaitforImage)),
 		}
 	} else if b.config.Comm.Type == "ssh" {
 		steps = []multistep.Step{
@@ -113,8 +114,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			new(stepGetBaseImageID),
 			new(stepCreateSshKeyPair),
 			new(stepCreateSshKeyVPC),
-			new(stepCreateInstance),
-			new(stepWaitforInstance),
+			withStage(StageCreateInstance, new(stepCreateInstance)),
+			withStage(StageWaitInstance, new(stepWaitforImage)),
 			new(stepGetIP),
 			new(stepCreateSecurityGroupRules),
 			&communicator.StepConnect{
@@ -122,10 +123,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:      sshCommHost,
 				SSHConfig: sshConfig,
 			},
-			new(stepInstallComponents),
+			withStage(StageInstallingComponents, new(stepInstallComponents)),
 			new(StepCreateVPCServiceInstance),
 			new(stepRebootInstance),
-			new(stepCaptureImage),
+			withStage(StageCaptureImage, new(stepCaptureImage)),
+			withStage(StageWaitInstance, new(stepWaitforImage)),
 		}
 	}
 
