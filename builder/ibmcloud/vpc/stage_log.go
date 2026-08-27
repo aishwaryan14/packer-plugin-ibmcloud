@@ -13,7 +13,7 @@ const (
 	StageWaitInstance         = "wait_instance"
 	StageInstallingComponents = "installing_components"
 	StageCaptureImage         = "capture_image"
-	StageImageWait            = "wait_image"
+	StageWaitImage            = "wait_image"
 )
 
 // emitStage writes a machine-readable stage marker to the Packer UI.
