@@ -20,6 +20,8 @@ func (step *stepGetBaseImageID) Run(_ context.Context, state multistep.StateBag)
 		vpcService = state.Get("vpcService").(*vpcv1.VpcV1)
 	}
 
+	emitStage(ui, "get_base_image", "START")
+
 	// Fetching Base Image ID
 	if config.VSIBaseImageName != "" {
 		ui.Say("Fetching Base Image ID...")
@@ -32,12 +34,14 @@ func (step *stepGetBaseImageID) Run(_ context.Context, state multistep.StateBag)
 			err := fmt.Errorf("[ERROR] Error getting base-image ID: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			emitStage(ui, "get_base_image", "FAIL")
 			return multistep.ActionHalt
 		}
 		if imageList != nil && len(imageList.Images) == 0 {
 			err := fmt.Errorf("[ERROR] Error getting base-image, Image %s not found", config.VSIBaseImageName)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			emitStage(ui, "get_base_image", "FAIL")
 			return multistep.ActionHalt
 		}
 		imageId := *imageList.Images[0].ID
@@ -48,6 +52,7 @@ func (step *stepGetBaseImageID) Run(_ context.Context, state multistep.StateBag)
 		state.Put("baseImageID", config.VSIBaseImageID)
 	}
 
+	emitStage(ui, "get_base_image", "END")
 	return multistep.ActionContinue
 }
 

@@ -20,6 +20,8 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
+	emitStage(ui, "capture_image", "START")
+
 	var vpcService *vpcv1.VpcV1
 	if state.Get("vpcService") != nil {
 		vpcService = state.Get("vpcService").(*vpcv1.VpcV1)
@@ -35,6 +37,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", err)
 		ui.Error(err.Error())
 		// log.Fatalf(err.Error())
+		emitStage(ui, "capture_image", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -45,6 +48,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 			state.Put("error", err)
 			ui.Error(err.Error())
 			// log.Fatalf(err.Error())
+			emitStage(ui, "capture_image", "FAIL")
 			return multistep.ActionHalt
 		}
 	}
@@ -99,6 +103,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", err)
 		ui.Error(err.Error())
 		log.Println(err.Error())
+		emitStage(ui, "capture_image", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -109,6 +114,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
+		emitStage(ui, "capture_image", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -132,6 +138,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 			err := fmt.Errorf("[ERROR] Error creating global tagging client: %s", errOpt)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			emitStage(ui, "capture_image", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -155,6 +162,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 			err := fmt.Errorf("[ERROR] Error attaching tags %v : %s\n%s", config.ImageTags, err, resp)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			emitStage(ui, "capture_image", "FAIL")
 			return multistep.ActionHalt
 		}
 	}
@@ -166,9 +174,11 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", err)
 		ui.Error(err.Error())
 		// log.Fatalf(err.Error())
+		emitStage(ui, "capture_image", "FAIL")
 		return multistep.ActionHalt
 	}
 	ui.Say("Image is now AVAILABLE!")
+	emitStage(ui, "capture_image", "END")
 	return multistep.ActionContinue
 }
 
