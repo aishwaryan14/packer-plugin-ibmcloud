@@ -16,8 +16,6 @@ func (s *stepWaitforInstance) Run(_ context.Context, state multistep.StateBag) m
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	emitStage(ui, "wait_instance", "START")
-
 	ui.Say("Waiting for the instance to become ACTIVE...")
 	instanceData := state.Get("instance_data").(*vpcv1.Instance)
 	instanceID := *instanceData.ID
@@ -26,8 +24,6 @@ func (s *stepWaitforInstance) Run(_ context.Context, state multistep.StateBag) m
 		err := fmt.Errorf("[ERROR] Error step waiting for instance to become ACTIVE: %s", err.Error())
 		state.Put("error", err)
 		ui.Error(err.Error())
-		// log.Fatalf(err.Error())
-		emitStage(ui, "wait_instance", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -35,7 +31,6 @@ func (s *stepWaitforInstance) Run(_ context.Context, state multistep.StateBag) m
 	newInstanceData, _ := client.retrieveResource(instanceID, state)
 	state.Put("instance_data", newInstanceData)
 	ui.Say("Instance is ACTIVE!")
-	emitStage(ui, "wait_instance", "END")
 	return multistep.ActionContinue
 }
 

@@ -1,7 +1,19 @@
 package vpc
 
 import (
+	"context"
+
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
+)
+
+// Stage name constants — used in withStage() calls in builder.go.
+const (
+	StageCreateInstance       = "create_instance"
+	StageWaitInstance         = "wait_instance"
+	StageInstallingComponents = "installing_components"
+	StageCaptureImage         = "capture_image"
+	StageImageWait            = "wait_image"
 )
 
 // emitStage writes a machine-readable stage marker to the Packer UI.
@@ -11,15 +23,34 @@ import (
 // ui.Machine routes to the machine-readable output channel (log only for
 // BasicUi; structured CSV when packer is run with -machine-readable) and
 // does not pollute the human-readable terminal output.
-//
-// Canonical stage names and their mapping to the VPC image-job API reason codes:
-//
-//	create_instance       → provisioning_worker   (failed_worker_provisioning)
-//	wait_instance         → provisioning_worker   (failed_worker_provisioning)
-//	installing_components → installing_components (failed_component_installation)
-//	image_validating      → image_validating      (failed_component_validation)
-//	capture_image         → image_capturing       (failed_image_capture)
-//	image_importing       → image_importing       (failed_image_import)
 func emitStage(ui packer.Ui, stage, status string) {
 	ui.Machine("stage", stage, status)
+}
+
+// stagedStep wraps a multistep.Step and automatically emits START/END/FAIL
+// machine-readable stage markers around the inner step's Run.
+type stagedStep struct {
+	stage string
+	inner multistep.Step
+}
+
+// withStage wraps inner so that its Run is bracketed by stage markers.
+func withStage(stage string, inner multistep.Step) multistep.Step {
+	return &stagedStep{stage: stage, inner: inner}
+}
+
+func (s *stagedStep) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
+	emitStage(ui, s.stage, "START")
+	action := s.inner.Run(ctx, state)
+	if action == multistep.ActionHalt {
+		emitStage(ui, s.stage, "FAIL")
+	} else {
+		emitStage(ui, s.stage, "END")
+	}
+	return action
+}
+
+func (s *stagedStep) Cleanup(state multistep.StateBag) {
+	s.inner.Cleanup(state)
 }

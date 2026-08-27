@@ -20,8 +20,6 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	emitStage(ui, "capture_image", "START")
-
 	var vpcService *vpcv1.VpcV1
 	if state.Get("vpcService") != nil {
 		vpcService = state.Get("vpcService").(*vpcv1.VpcV1)
@@ -36,8 +34,6 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		err := fmt.Errorf("[ERROR] Error stopping the instance: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		// log.Fatalf(err.Error())
-		emitStage(ui, "capture_image", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -47,8 +43,6 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 			err := fmt.Errorf("[ERROR] Error stopping the instance: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			// log.Fatalf(err.Error())
-			emitStage(ui, "capture_image", "FAIL")
 			return multistep.ActionHalt
 		}
 	}
@@ -103,7 +97,6 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", err)
 		ui.Error(err.Error())
 		log.Println(err.Error())
-		emitStage(ui, "capture_image", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -114,7 +107,6 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		err := fmt.Errorf("[ERROR] Error writing tracked resources file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
-		emitStage(ui, "capture_image", "FAIL")
 		return multistep.ActionHalt
 	}
 
@@ -138,7 +130,6 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 			err := fmt.Errorf("[ERROR] Error creating global tagging client: %s", errOpt)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "capture_image", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -162,26 +153,10 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 			err := fmt.Errorf("[ERROR] Error attaching tags %v : %s\n%s", config.ImageTags, err, resp)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			emitStage(ui, "capture_image", "FAIL")
 			return multistep.ActionHalt
 		}
 	}
 
-	emitStage(ui, "capture_image", "END")
-
-	emitStage(ui, "image_importing", "START")
-	ui.Say("Waiting for the Image to become AVAILABLE...")
-	err2 := client.waitForResourceReady(imageId, "images", config.StateTimeout, state)
-	if err2 != nil {
-		err := fmt.Errorf("[ERROR] Error waiting for the Image to become AVAILABLE: %s", err2)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		// log.Fatalf(err.Error())
-		emitStage(ui, "image_importing", "FAIL")
-		return multistep.ActionHalt
-	}
-	ui.Say("Image is now AVAILABLE!")
-	emitStage(ui, "image_importing", "END")
 	return multistep.ActionContinue
 }
 
@@ -196,3 +171,26 @@ func (s *stepCaptureImage) Cleanup(state multistep.StateBag) {
 	ui.Say("****************************************************************************")
 	ui.Say("")
 }
+
+// stepWaitforImage polls until the newly created image reaches AVAILABLE status.
+type stepWaitforImage struct{}
+
+func (s *stepWaitforImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+	client := state.Get("client").(*IBMCloudClient)
+	config := state.Get("config").(Config)
+	ui := state.Get("ui").(packer.Ui)
+
+	imageId := state.Get("image_id").(string)
+
+	ui.Say("Waiting for the Image to become AVAILABLE...")
+	if err := client.waitForResourceReady(imageId, "images", config.StateTimeout, state); err != nil {
+		err := fmt.Errorf("[ERROR] Error waiting for the Image to become AVAILABLE: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	ui.Say("Image is now AVAILABLE!")
+	return multistep.ActionContinue
+}
+
+func (s *stepWaitforImage) Cleanup(state multistep.StateBag) {}
