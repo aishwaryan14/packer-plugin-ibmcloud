@@ -15,7 +15,7 @@ func (s *stepRebootInstance) Run(_ context.Context, state multistep.StateBag) mu
 	client := state.Get("client").(*IBMCloudClient)
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
-	emitStage(ui, "reboot_instance", "START")
+	emitStage(ui, "image_validating", "START")
 
 	if config.SkipReboot {
 		ui.Say("Rebooting instance to cleanly complete any installed software components...")
@@ -28,8 +28,7 @@ func (s *stepRebootInstance) Run(_ context.Context, state multistep.StateBag) mu
 			err := fmt.Errorf("[ERROR] Error rebooting the instance: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			// log.Fatalf(err.Error())
-			emitStage(ui, "reboot_instance", "FAIL")
+			emitStage(ui, "image_validating", "FAIL")
 			return multistep.ActionHalt
 		}
 
@@ -39,8 +38,7 @@ func (s *stepRebootInstance) Run(_ context.Context, state multistep.StateBag) mu
 				err := fmt.Errorf("[ERROR] Error rebooting the instance: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
-				// log.Fatalf(err.Error())
-				emitStage(ui, "reboot_instance", "FAIL")
+				emitStage(ui, "image_validating", "FAIL")
 				return multistep.ActionHalt
 			}
 		}
@@ -50,17 +48,16 @@ func (s *stepRebootInstance) Run(_ context.Context, state multistep.StateBag) mu
 			err := fmt.Errorf("[ERROR] Error updating the instance: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
-			// log.Fatalf(err.Error())
-			emitStage(ui, "reboot_instance", "FAIL")
+			emitStage(ui, "image_validating", "FAIL")
 			return multistep.ActionHalt
 		}
 		state.Put("instance_data", newInstanceData)
 
 		ui.Say("Instance is ACTIVE!")
-		emitStage(ui, "reboot_instance", "END")
+		emitStage(ui, "image_validating", "END")
 		return multistep.ActionContinue
 	}
-	emitStage(ui, "reboot_instance", "END")
+	emitStage(ui, "image_validating", "END")
 	return multistep.ActionContinue
 }
 

@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
@@ -100,7 +99,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:        winRMCommHost,
 				WinRMConfig: winRMConfig,
 			},
-			new(commonsteps.StepProvision),
+			new(stepInstallComponents),
 			new(StepCreateVPCServiceInstance),
 			new(stepRebootInstance),
 			new(stepCaptureImage),
@@ -123,7 +122,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:      sshCommHost,
 				SSHConfig: sshConfig,
 			},
-			new(commonsteps.StepProvision),
+			new(stepInstallComponents),
 			new(StepCreateVPCServiceInstance),
 			new(stepRebootInstance),
 			new(stepCaptureImage),

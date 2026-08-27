@@ -167,6 +167,9 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		}
 	}
 
+	emitStage(ui, "capture_image", "END")
+
+	emitStage(ui, "image_importing", "START")
 	ui.Say("Waiting for the Image to become AVAILABLE...")
 	err2 := client.waitForResourceReady(imageId, "images", config.StateTimeout, state)
 	if err2 != nil {
@@ -174,11 +177,11 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", err)
 		ui.Error(err.Error())
 		// log.Fatalf(err.Error())
-		emitStage(ui, "capture_image", "FAIL")
+		emitStage(ui, "image_importing", "FAIL")
 		return multistep.ActionHalt
 	}
 	ui.Say("Image is now AVAILABLE!")
-	emitStage(ui, "capture_image", "END")
+	emitStage(ui, "image_importing", "END")
 	return multistep.ActionContinue
 }
 
