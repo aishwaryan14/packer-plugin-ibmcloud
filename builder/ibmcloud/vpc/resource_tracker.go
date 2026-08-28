@@ -9,20 +9,19 @@ import (
 )
 
 type trackedResources struct {
-	VPCSSHKeyID         string   `json:"vpc_ssh_key_id,omitempty"`
-	VPCSSHKeyName       string   `json:"vpc_ssh_key_name,omitempty"`
-	InstanceID          string   `json:"instance_id,omitempty"`
-	InstanceName        string   `json:"instance_name,omitempty"`
-	FloatingIPID        string   `json:"floating_ip_id,omitempty"`
-	FloatingIP          string   `json:"floating_ip,omitempty"`
-	SecurityGroupID     string   `json:"security_group_id,omitempty"`
-	SecurityGroupName   string   `json:"security_group_name,omitempty"`
-	SecurityGroupRuleID string   `json:"security_group_rule_id,omitempty"`
-	ImageID             string   `json:"image_id,omitempty"`
-	ResourceGroupID     string   `json:"resource_group_id,omitempty"`
-	SubnetID            string   `json:"subnet_id,omitempty"`
-	Region              string   `json:"region,omitempty"`
-	CleanupOrder        []string `json:"cleanup_order,omitempty"`
+	VPCSSHKeyID         string `json:"vpc_ssh_key_id,omitempty"`
+	VPCSSHKeyName       string `json:"vpc_ssh_key_name,omitempty"`
+	InstanceID          string `json:"instance_id,omitempty"`
+	InstanceName        string `json:"instance_name,omitempty"`
+	FloatingIPID        string `json:"floating_ip_id,omitempty"`
+	FloatingIP          string `json:"floating_ip,omitempty"`
+	SecurityGroupID     string `json:"security_group_id,omitempty"`
+	SecurityGroupName   string `json:"security_group_name,omitempty"`
+	SecurityGroupRuleID string `json:"security_group_rule_id,omitempty"`
+	ImageID             string `json:"image_id,omitempty"`
+	ResourceGroupID     string `json:"resource_group_id,omitempty"`
+	SubnetID            string `json:"subnet_id,omitempty"`
+	Region              string `json:"region,omitempty"`
 }
 
 func writeTrackedResources(state multistep.StateBag) error {
@@ -32,9 +31,8 @@ func writeTrackedResources(state multistep.StateBag) error {
 	}
 
 	resources := trackedResources{
-		CleanupOrder: []string{"floating_ip", "instance", "security_group_rule", "security_group", "vpc_ssh_key"},
-		SubnetID:     config.SubnetID,
-		Region:       config.Region,
+		SubnetID: config.SubnetID,
+		Region:   config.Region,
 	}
 	if config.ResourceGroupID != "" {
 		resources.ResourceGroupID = config.ResourceGroupID
