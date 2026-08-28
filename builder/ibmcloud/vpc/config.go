@@ -116,7 +116,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if c.RCEndpoint == "" {
 		c.RCEndpoint = "https://resource-controller.cloud.ibm.com"
 	}
-	if c.ResourceTrackFile == "" {
+	// Only default the tracker file when the user has opted in via the
+	// PACKER_RESOURCE_TRACKING=1 environment variable (analogous to PACKER_LOG=1)
+	if c.ResourceTrackFile == "" && os.Getenv("PACKER_RESOURCE_TRACKING") == "1" {
 		c.ResourceTrackFile = "packer-resources.json"
 	}
 
