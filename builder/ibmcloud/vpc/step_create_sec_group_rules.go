@@ -16,7 +16,6 @@ func (s *stepCreateSecurityGroupRules) Run(_ context.Context, state multistep.St
 	client := state.Get("client").(*IBMCloudClient)
 	config := state.Get("config").(Config)
 
-
 	if config.SecurityGroupID == "" {
 		ui.Say(fmt.Sprintf("Creating a temp Security Group on VPC %s ...", state.Get("vpc_id").(string)))
 

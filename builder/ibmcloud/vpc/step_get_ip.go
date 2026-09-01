@@ -37,6 +37,7 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 			err := fmt.Errorf("[ERROR] Error creating FloatingIP: %s", errIP)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			// log.Fatalf(err.Error())
 			return multistep.ActionHalt
 		}
 
@@ -56,6 +57,7 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 			err := fmt.Errorf("[ERROR] Error waiting for Floating IP to become ACTIVE: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			// log.Fatalf(err.Error())
 			return multistep.ActionHalt
 		}
 		ui.Say("Floating IP is ACTIVE!")
@@ -92,8 +94,10 @@ func (step *stepGetIP) Run(_ context.Context, state multistep.StateBag) multiste
 		err := fmt.Errorf("[ERROR] Failed to write IP address to file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
+		// log.Fatalf(err.Error())
 		return multistep.ActionHalt
 	}
+	// ui.Say(fmt.Sprintf("IP address has been written into file %s", hostsFilePath))
 	return multistep.ActionContinue
 }
 

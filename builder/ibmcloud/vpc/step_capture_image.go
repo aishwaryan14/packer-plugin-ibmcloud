@@ -34,6 +34,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 		err := fmt.Errorf("[ERROR] Error stopping the instance: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
+		// log.Fatalf(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -43,6 +44,7 @@ func (s *stepCaptureImage) Run(_ context.Context, state multistep.StateBag) mult
 			err := fmt.Errorf("[ERROR] Error stopping the instance: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
+			// log.Fatalf(err.Error())
 			return multistep.ActionHalt
 		}
 	}
@@ -187,6 +189,7 @@ func (s *stepWaitforImage) Run(_ context.Context, state multistep.StateBag) mult
 		err := fmt.Errorf("[ERROR] Error waiting for the Image to become AVAILABLE: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
+		// log.Fatalf(err.Error())
 		return multistep.ActionHalt
 	}
 	ui.Say("Image is now AVAILABLE!")
