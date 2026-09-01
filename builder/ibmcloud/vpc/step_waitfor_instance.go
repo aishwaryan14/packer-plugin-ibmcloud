@@ -24,6 +24,7 @@ func (s *stepWaitforInstance) Run(_ context.Context, state multistep.StateBag) m
 		err := fmt.Errorf("[ERROR] Error step waiting for instance to become ACTIVE: %s", err.Error())
 		state.Put("error", err)
 		ui.Error(err.Error())
+		// log.Fatalf(err.Error())
 		return multistep.ActionHalt
 	}
 

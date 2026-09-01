@@ -20,7 +20,6 @@ func (step *stepGetBaseImageID) Run(_ context.Context, state multistep.StateBag)
 		vpcService = state.Get("vpcService").(*vpcv1.VpcV1)
 	}
 
-
 	// Fetching Base Image ID
 	if config.VSIBaseImageName != "" {
 		ui.Say("Fetching Base Image ID...")

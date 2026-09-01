@@ -20,7 +20,6 @@ func (s *stepVerifyInput) Run(_ context.Context, state multistep.StateBag) multi
 	client := state.Get("client").(*IBMCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
-
 	// vpc service
 	var vpcService *vpcv1.VpcV1
 	if state.Get("vpcService") != nil {
